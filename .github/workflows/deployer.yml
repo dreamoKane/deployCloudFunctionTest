@@ -27,12 +27,15 @@ jobs:
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         run: |
-          modified_dirs=()
-
           modified_files=$(git log -1 --name-only)
-          echo "Modified files:"
-          echo "$modified_files"
-          echo "::set-output name=modified_files::$modified_files"
+
+          modified_dirs=()
+          for file in $modified_files; do
+            # 파일 경로에 src가 포함된 경우만 추가
+            if [[ "$file" == *"src/"* ]]; then
+              modified_dirs+=("$(dirname "$file")")  # 부모 디렉토리 추가
+            fi
+          done
 
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
           for dir in "${modified_dirs[@]}"; do
