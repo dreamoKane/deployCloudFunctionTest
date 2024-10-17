@@ -31,7 +31,7 @@ jobs:
               --region europe-west1 \
               --runtime nodejs20 \
               --source "$dir" \
-              --entry-point $function_name \
+              --entry-point ${function_name} \
               --trigger-http \
               --allow-unauthenticated \
               --timeout 60 \
