@@ -38,6 +38,9 @@ jobs:
         run: |
           modified_files=()
           modified_dirs=()
+          echo "Src filter result: ${{ steps.filter.outputs.src }}"  # src 필터 결과 출력
+          echo "Changed files output: ${{ steps.filter.outputs.src_files }}"  # 변경된 파일 리스트 출력
+
           if [[ "${{ steps.filter.outputs.src }}" == "true" ]]; then
               modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' ' '))  # 변경된 파일 리스트를 배열로 변환
 
