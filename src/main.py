@@ -1,11 +1,10 @@
-from flask import Flask, request
+from flask import Flask
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def hello_world():
-    return "Hello World!", 200
+    return "Hello World!"
 
-# Cloud Functions가 호출할 수 있도록 main 함수 추가
-def hello_world_handler(request):
-    return app(request)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080)  # 포트 8080에서 실행
