@@ -31,11 +31,7 @@ jobs:
             # 파일 경로에 src가 포함된 경우만 추가
             if [[ "$dir" == *"src/"* ]]; then
               src_dir=${dir%%/src/*}/src/$(basename "$dir")  # src 하위 디렉토리 추출
-              
-              # 중복 확인 후 추가
-              if [[ ! " ${modified_dirs[@]} " =~ " ${src_dir} " ]]; then
-                modified_dirs+=("$src_dir")
-              fi
+              modified_dirs+=("$src_dir")
             fi
           done
 
