@@ -30,7 +30,7 @@ jobs:
           echo "Fetching last commit modified files..."
 
           # 최근 커밋에서 수정된 파일 목록을 가져옵니다.
-          modified_files=$(git diff --name-only HEAD~1 HEAD)
+          modified_files=$(git show --name-only --pretty=format: HEAD)
     
           echo "Modified files:"
           echo "$modified_files"  # 최근 커밋의 수정된 파일 목록 출력
