@@ -25,12 +25,14 @@ jobs:
       - name: Deploy Cloud Functions
         run: |
           modified_dirs=()
-          for file in $(git diff --name-only HEAD~1 HEAD); do
+          for file in $(git diff --name-only origin/main HEAD); do
+            echo "Modified file: $file"
             dir=$(dirname "$file")  # 파일의 첫 번째 부모 디렉토리 추출
 
             # 파일 경로에 src가 포함된 경우만 추가
             if [[ "$dir" == *"src/"* ]]; then
               src_dir=${dir%%/src/*}/src/$(basename "$dir")  # src 하위 디렉토리 추출
+              echo "Adding directory: $src_dir" 
               modified_dirs+=("$src_dir")
             fi
           done
