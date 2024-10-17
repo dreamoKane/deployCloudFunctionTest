@@ -28,7 +28,10 @@ jobs:
       - name: Deploy Cloud Functions
         run: |
           echo "Fetching last commit modified files..."
-          modified_files=$(git log -1 --name-only)
+
+          # 최근 커밋에서 수정된 파일 목록을 가져옵니다.
+          modified_files=$(git diff --name-only HEAD~1 HEAD)
+    
           echo "Modified files:"
           echo "$modified_files"  # 최근 커밋의 수정된 파일 목록 출력
 
