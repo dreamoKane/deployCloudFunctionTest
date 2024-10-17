@@ -7,6 +7,6 @@ app.get('/', (req, res) => {
 });
 
 // Cloud Functions에서 사용할 엔트리 포인트 함수
-exports.helloWorld = (req, res) => {
+exports.deploy_test = (req, res) => {
     app(req, res);
 };
