@@ -28,7 +28,7 @@ jobs:
       - name: Deploy Cloud Functions
         run: |
           modified_dirs=()
-          for file in $(git diff --name-only HEAD~1 HEAD); do
+          for file in $(git diff --name-only origin/main...HEAD); do
             echo "Modified file: $file"
             dir=$(dirname "$file")  # 파일의 첫 번째 부모 디렉토리 추출
 
