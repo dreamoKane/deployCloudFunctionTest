@@ -27,11 +27,11 @@ jobs:
           for dir in src/*/; do
             function_name=$(basename "$dir")  # 폴더 이름에서 함수 이름 가져오기
             echo "Deploying function: $function_name"
-            gcloud functions deploy ${function_name}_cf \
+            gcloud functions deploy ${function_name} \
               --region europe-west1 \
               --runtime nodejs20 \
               --source "$dir" \
-              --entry-point helloWorld \
+              --entry-point $function_name \
               --trigger-http \
               --allow-unauthenticated \
               --timeout 60 \
