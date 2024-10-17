@@ -36,5 +36,6 @@ jobs:
               --allow-unauthenticated \
               --timeout 60 \
               --max-instances 1
+              --no-gen2
           done
 
