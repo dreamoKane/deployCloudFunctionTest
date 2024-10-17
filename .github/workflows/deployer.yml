@@ -10,24 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-        # Log successful authentication
-        run: echo "Authenticated to Google Cloud successfully."
 
       # Set up Google Cloud SDK
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-        # Log successful setup
-        run: echo "Google Cloud SDK set up successfully for project ${{ secrets.GCP_PROJECT_ID }}."
 
       # Get modified files
       - name: Get changed files
@@ -41,19 +36,23 @@ jobs:
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         run: |
-          echo "Checking for modified directories..."
+          modified_files=()
           modified_dirs=()
           if [[ "${{ steps.filter.outputs.src }}" == "true" ]]; then
-            modified_dirs+=("src")  # src 디렉토리에 변경 사항이 있을 경우 추가
-            echo "Changes detected in 'src' directory."
-          else
-            echo "No changes detected in 'src' directory."
+              modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' ' '))  # 변경된 파일 리스트를 배열로 변환
+
+              for file in "${modified_files[@]}"; do  # 이 부분 수정
+                src_dir=$(dirname "$file")  # src 디렉토리 가져오기
+                echo "Adding directory: $src_dir" 
+                modified_dirs+=("$src_dir")
+              done  # 이 부분 수정
           fi
 
           # 중복된 디렉토리 제거
           modified_dirs=($(printf "%s\n" "${modified_dirs[@]}" | sort -u))
 
           echo "Modified directories: ${modified_dirs[@]}"
+
           echo "Number of modified directories: ${#modified_dirs[@]}"  # 수정된 디렉토리 개수 출력
 
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
