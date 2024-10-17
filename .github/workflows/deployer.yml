@@ -21,16 +21,16 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Deploy the Cloud Function
+      # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         run: |
-          for file in src/*.js; do
-            function_name=$(basename "$file" .js)  # 파일 이름에서 확장자 제거
+          for dir in src/*/; do
+            function_name=$(basename "$dir")  # 폴더 이름에서 함수 이름 가져오기
             echo "Deploying function: $function_name"
             gcloud functions deploy ${function_name}_cf \
               --region europe-west1 \
               --runtime nodejs20 \
-              --source src/ \
+              --source "$dir" \
               --entry-point helloWorld \
               --trigger-http \
               --allow-unauthenticated \
@@ -38,4 +38,3 @@ jobs:
               --max-instances 1 \
               --no-gen2
           done
-
