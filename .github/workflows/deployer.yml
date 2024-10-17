@@ -30,10 +30,7 @@ jobs:
 
             # 부모 디렉토리가 src인지 확인
             if [[ "$dir" == src/* ]]; then
-              # 중복 확인
-              if [[ ! " ${modified_dirs[@]} " =~ " ${dir} " ]]; then
-                  modified_dirs+=("$dir")
-              fi
+              modified_dirs+=("${dir}")
             fi
           done
 
