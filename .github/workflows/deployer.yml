@@ -35,6 +35,8 @@ jobs:
             fi
           done
 
+          echo "Number of modified directories: ${#modified_dirs[@]}"
+
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
           for dir in "${modified_dirs[@]}"; do
             function_name=$(basename "$dir")  # 함수 이름 가져오기
