@@ -9,16 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0.4.0
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up Google Cloud SDK
+      # Set up Google Cloud SDK
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      # Deploy the Cloud Function
       - name: Deploy Cloud Functions
         run: |
           for file in src/*.py; do
@@ -30,5 +33,7 @@ jobs:
               --source src/ \
               --entry-point $function_name \
               --trigger-http \
-              --allow-unauthenticated
+              --allow-unauthenticated \
+              --timeout 60 \
+              --max-instances 1
           done
