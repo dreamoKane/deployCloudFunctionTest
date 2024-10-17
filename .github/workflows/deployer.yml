@@ -7,9 +7,6 @@ jobs:
   run:
     # worker runs on latest ubuntu
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: deployCloudFunctionTest
 
     steps:
       # checkout to our repository so we have access to the source code
@@ -17,7 +14,7 @@ jobs:
 
       # the actual deployment to google
       - name: Cloud Functions Deploy
-        uses: google-github-actions/deploy-cloud-functions@v0.1.2
+        uses: google-github-actions/setup-gcloud@v1
         with:
           credentials: ${{ secrets.GCP_SA_KEY }}
           name: python-hello-world-cf
