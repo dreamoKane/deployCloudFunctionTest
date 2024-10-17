@@ -7,6 +7,9 @@ jobs:
   run:
     # worker runs on latest ubuntu
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deployCloudFunctionTest
 
     steps:
       # checkout to our repository so we have access to the source code
@@ -21,7 +24,7 @@ jobs:
           description: Test python cloud function # nullable
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           region: europe-west1
-          source_dir: deployCloudFunctionTest/src
+          source_dir: src
           # name of our function in our main.py file, defaults to the resource name suffix 
           entry_point: hello_world
           # runtime to use for the function
