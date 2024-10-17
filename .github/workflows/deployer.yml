@@ -24,17 +24,17 @@ jobs:
       # Deploy the Cloud Function
       - name: Deploy Cloud Functions
         run: |
-          for file in src/*.py; do
-            function_name=$(basename "$file" .py)  # 파일 이름에서 확장자 제거
+          for file in src/*.js; do
+            function_name=$(basename "$file" .js)  # 파일 이름에서 확장자 제거
             echo "Deploying function: $function_name"
             gcloud functions deploy ${function_name}_cf \
               --region europe-west1 \
-              --runtime python39 \
+              --runtime nodejs20 \
               --source src/ \
-              --entry-point $function_name \
+              --entry-point helloWorld \
               --trigger-http \
               --allow-unauthenticated \
               --timeout 60 \
               --max-instances 1
-              --no-gen2
           done
+
