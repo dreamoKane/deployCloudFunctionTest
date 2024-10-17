@@ -9,28 +9,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Authenticate to Google Cloud
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      # Set up Google Cloud SDK
-      - name: Set up Cloud SDK
+      - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_file_path: ${{ secrets.GCP_SA_KEY }}
 
-      # Deploy the Cloud Function
-      - name: Cloud Functions Deploy
-        uses: google-github-actions/deploy-cloud-functions@v1
-        with:
-          name: python-hello-world-cf
-          description: Test python cloud function
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          region: europe-west1
-          source_dir: src
-          entry_point: hello_world
-          runtime: python39
-          timeout: 60
-          max_instances: 1
+      - name: Deploy Cloud Functions
+        run: |
+          for file in src/*.py; do
+            function_name=$(basename "$file" .py)  # 파일 이름에서 확장자 제거
+            echo "Deploying function: $function_name"
+            gcloud functions deploy ${function_name}_cf \
+              --region europe-west1 \
+              --runtime python39 \
+              --source src/ \
+              --entry-point $function_name \
+              --trigger-http \
+              --allow-unauthenticated
+          done
