@@ -28,11 +28,8 @@ jobs:
       - name: Deploy Cloud Functions
         run: |
           modified_dirs=()
-
-          modified_files=$(git diff --name-only origin/main HEAD)
-          echo "Modified files: $modified_files"
-
-          for file in $modified_files; do
+          # 마지막 커밋의 변경 파일 가져오기
+          for file in $(git diff-tree --no-commit-id --name-only -r HEAD); do
             echo "Modified file: $file"
             dir=$(dirname "$file")  # 파일의 첫 번째 부모 디렉토리 추출
 
