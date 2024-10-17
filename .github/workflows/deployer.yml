@@ -28,20 +28,11 @@ jobs:
       - name: Deploy Cloud Functions
         run: |
           modified_dirs=()
-          # 마지막 커밋의 변경 파일 가져오기
-          for file in $(git diff-tree --no-commit-id --name-only -r HEAD); do
-            echo "Modified file: $file"
-            dir=$(dirname "$file")  # 파일의 첫 번째 부모 디렉토리 추출
 
-            # 파일 경로에 src가 포함된 경우만 추가
-            if [[ "$dir" == *"src/"* ]]; then
-              src_dir=${dir%%/src/*}/src/$(basename "$dir")  # src 하위 디렉토리 추출
-              echo "Adding directory: $src_dir" 
-              modified_dirs+=("$src_dir")
-            fi
-          done
-
-          echo "Number of modified directories: ${#modified_dirs[@]}"
+          modified_files=$(git log -1 --name-only)
+          echo "Modified files:"
+          echo "$modified_files"
+          echo "::set-output name=modified_files::$modified_files"
 
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
           for dir in "${modified_dirs[@]}"; do
