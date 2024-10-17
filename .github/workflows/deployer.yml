@@ -27,20 +27,33 @@ jobs:
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         run: |
+          echo "Fetching last commit modified files..."
           modified_files=$(git log -1 --name-only)
+          echo "Modified files:"
+          echo "$modified_files"  # 최근 커밋의 수정된 파일 목록 출력
 
           modified_dirs=()
           for file in $modified_files; do
             # 파일 경로에 src가 포함된 경우만 추가
             if [[ "$file" == *"src/"* ]]; then
-              modified_dirs+=("$(dirname "$file")")  # 부모 디렉토리 추가
-            fi
+              dir=$(dirname "$file")  # 부모 디렉토리 추가
+
+              # 중복 체크
+              if [[ ! " ${modified_dirs[@]} " =~ " ${dir} " ]]; then
+                modified_dirs+=("$dir")
+                echo "Adding directory for deployment: $dir"  # 추가된 디렉토리 출력
+              else
+                echo "Directory $dir is already in the list, skipping."  # 중복된 디렉토리 건너뛰기
+              fi
+            fi  
           done
+
+          echo "Number of modified directories: ${#modified_dirs[@]}"  # 수정된 디렉토리 개수 출력
 
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
           for dir in "${modified_dirs[@]}"; do
             function_name=$(basename "$dir")  # 함수 이름 가져오기
-            echo "Deploying function: $function_name"
+            echo "Deploying function: $function_name from directory: $dir"
             gcloud functions deploy ${function_name} \
               --region us-central1 \
               --runtime nodejs20 \
@@ -51,4 +64,6 @@ jobs:
               --timeout 60 \
               --max-instances 1 \
               --no-gen2
+
+            echo "Function $function_name deployed successfully."  # 배포 성공 메시지 출력
           done
