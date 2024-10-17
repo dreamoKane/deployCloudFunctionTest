@@ -1,6 +1,9 @@
 name: Deployment
 
-on: [push]
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 푸시될 때만 작동
 
 jobs:
   run:
