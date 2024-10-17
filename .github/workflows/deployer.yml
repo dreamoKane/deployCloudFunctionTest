@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   run:
-    runs-on: us-central1
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -24,30 +24,30 @@ jobs:
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         run: |
-        modified_dirs=()
-        for file in $(git diff --name-only HEAD~1 HEAD); do
-          dir=$(dirname "$file")  # 파일의 부모 디렉토리
+          modified_dirs=()
+          for file in $(git diff --name-only HEAD~1 HEAD); do
+            dir=$(dirname "$file")  # 파일의 부모 디렉토리
 
-          # 부모 디렉토리가 src인지 확인
-          if [[ "$dir" == src/* ]]; then
-            # 중복 확인
-            if [[ ! " ${modified_dirs[@]} " =~ " ${dir} " ]]; then
-                modified_dirs+=("$dir")
+            # 부모 디렉토리가 src인지 확인
+            if [[ "$dir" == src/* ]]; then
+              # 중복 확인
+              if [[ ! " ${modified_dirs[@]} " =~ " ${dir} " ]]; then
+                  modified_dirs+=("$dir")
+              fi
             fi
-          fi
-        done
+          done
 
-        for dir in "${modified_dirs[@]}"; do
-          function_name=$(basename "$dir")  # 폴더 이름에서 함수 이름 가져오기
-          echo "Deploying function: $function_name"
-          gcloud functions deploy ${function_name} \
-            --region us-central1 \
-            --runtime nodejs20 \
-            --source "$dir" \
-            --entry-point ${function_name} \
-            --trigger-http \
-            --allow-unauthenticated \
-            --timeout 60 \
-            --max-instances 1 \
-            --no-gen2
-        done
+          for dir in "${modified_dirs[@]}"; do
+            function_name=$(basename "$dir")  # 폴더 이름에서 함수 이름 가져오기
+            echo "Deploying function: $function_name"
+            gcloud functions deploy ${function_name} \
+              --region us-central1 \
+              --runtime nodejs20 \
+              --source "$dir" \
+              --entry-point ${function_name} \
+              --trigger-http \
+              --allow-unauthenticated \
+              --timeout 60 \
+              --max-instances 1 \
+              --no-gen2
+          done
