@@ -1,35 +1,36 @@
 name: Deployment
 
-# on commit push, run job
-on: [ push ]
+on: [push]
 
 jobs:
   run:
-    # worker runs on latest ubuntu
     runs-on: ubuntu-latest
 
     steps:
-      # checkout to our repository so we have access to the source code
       - uses: actions/checkout@v2
 
-      # the actual deployment to google
-      - name: Cloud Functions Deploy
+      # Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Set up Google Cloud SDK
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          credentials: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # Deploy the Cloud Function
+      - name: Cloud Functions Deploy
+        uses: google-github-actions/deploy-cloud-functions@v1
+        with:
           name: python-hello-world-cf
-          description: Test python cloud function # nullable
+          description: Test python cloud function
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           region: europe-west1
           source_dir: src
-          # name of our function in our main.py file, defaults to the resource name suffix 
           entry_point: hello_world
-          # runtime to use for the function
           runtime: python39
-          # the function execution timeout
           timeout: 60
-          # the maximum number of instances for the function.
           max_instances: 1
-          # optional configs, see google-cloud-actions/deploy-cloud-functions for full reference
-          # list of key-value pairs to set as environment variables in the form KEY1=VALUE1,KEY2=VALUE2.
-#       env_vars: # optional
