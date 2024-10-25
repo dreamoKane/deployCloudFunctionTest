@@ -3,7 +3,7 @@ name: Deployment
 on:
   push:
     branches:
-      - main  # develop 브랜치에 푸시될 때만 작동
+      - main  # main 브랜치에 푸시될 때만 작동
 
 jobs:
   run:
@@ -24,7 +24,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Get modified files(product/src 파일 안에 수정된 파일들만 필터링)
+      # Get modified files (src 파일 안에 수정된 파일들만 필터링)
       - name: Get changed files
         id: filter
         uses: dorny/paths-filter@v2
@@ -32,7 +32,7 @@ jobs:
           list-files: shell
           filters: |
             src:
-              - 'product/src/**/*' 
+              - 'src/**/*.js'  # JS 파일만 감지
 
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
@@ -44,7 +44,7 @@ jobs:
               modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' ' '))
 
               for file in "${modified_files[@]}"; do
-                src_dir=$(dirname "$file")  # product/src 디렉토리 가져오기
+                src_dir=$(dirname "$file")  # src 디렉토리 가져오기
                 modified_dirs+=("$src_dir")
               done
           fi
@@ -52,15 +52,35 @@ jobs:
           # 중복된 디렉토리 제거
           modified_dirs=($(printf "%s\n" "${modified_dirs[@]}" | sort -u))
 
+          # 임시 디렉토리 생성
+          temp_dir=$(mktemp -d)
+
           # 수정된 디렉토리들에 대해 Cloud Function을 배포
           for dir in "${modified_dirs[@]}"; do
             function_name=$(basename "$dir")  # 함수 이름 가져오기
-            echo "Deploying function: $function_name from directory: $dir"
-            gcloud functions deploy ${function_name} \
+            
+            # JS 파일을 임시 디렉토리로 복사
+            for js_file in "$dir"/*.js; do
+              cp "$js_file" "$temp_dir/"
+            done
+
+            # develop_config 폴더의 파일을 임시 디렉토리로 복사
+            cp ./develop_config/* "$temp_dir/" 
+
+            # 배포할 JS 파일이 index.js가 아닐 경우 이름 변경
+            if [[ -f "$temp_dir/$(basename "$js_file")" && $(basename "$js_file") != "index.js" ]]; then
+              mv "$temp_dir/$(basename "$js_file")" "$temp_dir/index.js"
+              entry_point="index"
+            else
+              entry_point="${function_name}"  # 함수 이름을 entry point로 설정
+            fi
+            
+            echo "Deploying function: $function_name from directory: $temp_dir"
+            gcloud functions deploy "${function_name}" \
               --region us-central1 \
               --runtime nodejs20 \
-              --source "$dir" \
-              --entry-point ${function_name} \
+              --source "$temp_dir" \
+              --entry-point "$entry_point" \
               --trigger-http \
               --allow-unauthenticated \
               --timeout 60 \
@@ -68,4 +88,10 @@ jobs:
               --no-gen2
 
             echo "Function $function_name deployed successfully."
+
+            # 임시 디렉토리에서 파일 삭제
+            rm -rf "$temp_dir/*"
           done
+
+          # 최종적으로 임시 디렉토리 삭제
+          rmdir "$temp_dir"
