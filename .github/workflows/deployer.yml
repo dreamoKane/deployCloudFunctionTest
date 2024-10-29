@@ -38,6 +38,20 @@ jobs:
       - name: Deploy Cloud Functions
         if: ${{ steps.filter.outputs.src == 'true' }}
         run: |
+          # 임시 디렉토리 생성
+          deploy_dir=$(mktemp -d)
+
           modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' '\n'))
 
           echo "Modified files: ${modified_files[@]}"
+
+          cp ./develop_config/{*,.*} "$deploy_dir/" 2>/dev/null || true
+
+          for file in "${modified_files[@]}"; do
+            if [[ "$file" == *.js ]]; then
+              cp "$file" "$deploy_dir/index.js"
+            fi
+          done
+
+          echo "Contents of deploy_dir:"
+          ls -la "$deploy_dir"
