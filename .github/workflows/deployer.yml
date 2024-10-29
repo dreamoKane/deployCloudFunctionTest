@@ -49,6 +49,10 @@ jobs:
 
           for file in "${modified_files[@]}"; do
             if [[ "$file" == *.js ]]; then
+
+              function_name=$(basename "$file" .js)
+              echo "Function Name: ${function_name}"
+
               cp "$file" "$deploy_dir/index.js"
             fi
           done
