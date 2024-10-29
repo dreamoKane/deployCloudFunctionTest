@@ -48,7 +48,7 @@ jobs:
 
               echo "Deploying Function: ${function_name}"
 
-              cp ./develop_config/{*,.*} "$deploy_dir/" 2>/dev/null
+              cp ./develop_config/{*,.*} "$deploy_dir/" 2>/dev/null || true
               cp "$file" "$deploy_dir/index.js"
 
               echo "Contents of deploy_dir:"
