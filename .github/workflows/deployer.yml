@@ -24,7 +24,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Get modified files(product/src 파일 안에 수정된 파일들만 필터링)
+      # Get modified files (src 파일 안에 수정된 파일들만 필터링)
       - name: Get changed files
         id: filter
         uses: dorny/paths-filter@v2
@@ -38,14 +38,14 @@ jobs:
       - name: Deploy Cloud Functions
         if: ${{ steps.filter.outputs.src == 'true' }}
         run: |
-        modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' '\n'))
-        modified_dirs=()
+          modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' '\n'))
+          modified_dirs=()
 
-        for file in "${modified_files[@]}"; do
-          dir=$(dirname "$file")
-          modified_dirs+=("$dir")
-        done
+          for file in "${modified_files[@]}"; do
+            dir=$(dirname "$file")
+            modified_dirs+=("$dir")
+          done
 
-        modified_dirs=($(printf "%s\n" "${modified_dirs[@]}" | sort -u))
+          modified_dirs=($(printf "%s\n" "${modified_dirs[@]}" | sort -u))
 
-        echo "Modified directories: ${modified_dirs[@]}"
+          echo "Modified directories: ${modified_dirs[@]}"
