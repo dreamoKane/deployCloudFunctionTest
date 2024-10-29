@@ -39,13 +39,5 @@ jobs:
         if: ${{ steps.filter.outputs.src == 'true' }}
         run: |
           modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' '\n'))
-          modified_dirs=()
 
-          for file in "${modified_files[@]}"; do
-            dir=$(dirname "$file")
-            modified_dirs+=("$dir")
-          done
-
-          modified_dirs=($(printf "%s\n" "${modified_dirs[@]}" | sort -u))
-
-          echo "Modified directories: ${modified_dirs[@]}"
+          echo "Modified files: ${modified_files[@]}"
