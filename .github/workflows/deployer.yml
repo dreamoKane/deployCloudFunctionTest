@@ -3,7 +3,7 @@ name: Deployment
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때만 작동
+      - main
 
 jobs:
   run:
@@ -24,7 +24,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Get modified files (src 파일 안에 수정된 파일들만 필터링)
+      # Get modified files
       - name: Get changed files
         id: filter
         uses: dorny/paths-filter@v2
@@ -32,30 +32,39 @@ jobs:
           list-files: shell
           filters: |
             src:
-              - 'src/**/*.js'  # JS 파일만 감지
+              - 'src/**/*.js'
 
       # Deploy the Cloud Functions
       - name: Deploy Cloud Functions
         if: ${{ steps.filter.outputs.src == 'true' }}
         run: |
-          # 임시 디렉토리 생성
-          deploy_dir=$(mktemp -d)
-
           modified_files=($(echo "${{ steps.filter.outputs.src_files }}" | tr ',' '\n'))
-
           echo "Modified files: ${modified_files[@]}"
-
-          cp ./develop_config/{*,.*} "$deploy_dir/" 2>/dev/null || true
 
           for file in "${modified_files[@]}"; do
             if [[ "$file" == *.js ]]; then
-
+              deploy_dir=$(mktemp -d)
               function_name=$(basename "$file" .js)
-              echo "Function Name: ${function_name}"
 
+              echo "Deploying Function: ${function_name}"
+
+              cp ./develop_config/{*,.*} "$deploy_dir/" 2>/dev/null
               cp "$file" "$deploy_dir/index.js"
+
+              echo "Contents of deploy_dir:"
+              ls -la "$deploy_dir"
+
+              gcloud functions deploy "$function_name" \
+                --region us-central1 \
+                --runtime nodejs20 \
+                --source "$deploy_dir" \
+                --entry-point "$function_name" \
+                --trigger-http \
+                --allow-unauthenticated \
+                --timeout 60 \
+                --max-instances 1 \
+                --no-gen2
+
+              rm -rf "$deploy_dir"
             fi
           done
-
-          echo "Contents of deploy_dir:"
-          ls -la "$deploy_dir"
